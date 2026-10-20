@@ -113,6 +113,23 @@ try {
   await page.locator('#text-value').fill('Visible preview after early state message');
   await heading.filter({ hasText: 'Visible preview after early state message' }).waitFor();
   await page.screenshot({ path: 'output/dev-preview-check.png', fullPage: true });
+  await page.locator('#clear-bg-color').click();
+  assert.equal(await heading.evaluate(el => el.style.backgroundColor), 'transparent');
+  await frame.locator('main svg[data-ve-id]').first().click();
+  await page.locator('[data-tab="effects"]').click();
+  assert.equal(await page.locator('#sticker-grid button:visible').count(), 24);
+  const firstSticker = await page.locator('#sticker-grid button:visible').first().getAttribute('data-sticker');
+  await page.locator('#sticker-next').click();
+  assert.notEqual(await page.locator('#sticker-grid button:visible').first().getAttribute('data-sticker'), firstSticker);
+  await page.locator('#sticker-prev').click();
+  assert.equal(await page.locator('#sticker-grid button:visible').first().getAttribute('data-sticker'), firstSticker);
+  await page.locator('[data-manager="contact"]').first().click();
+  const contactInput = page.locator('#tab-contact input').first();
+  await contactInput.fill('Contact browser verification');
+  await contactInput.dispatchEvent('change');
+  assert.ok(JSON.stringify(await page.evaluate(() => EditorAPI.document().contact)).includes('Contact browser verification'));
+  await page.locator('#manager-back').click();
+
   await page.locator('#interactive').check();
   await frame.locator('body.ve-interactive').waitFor();
   await page.locator('#interactive').uncheck();

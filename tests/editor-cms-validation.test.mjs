@@ -2,13 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+
 import { validateDocument } from '../worker/index.js';
 import extraStickers from '../src/shared/sticker-library.json' with { type: 'json' };
+
 const context = { window: {} };
+
 vm.runInNewContext(
   readFileSync(new URL('../src/shared/site-config.js', import.meta.url), 'utf8'),
   context,
 );
+
 const fixture = () =>
   JSON.parse(
     JSON.stringify({
@@ -17,17 +21,31 @@ const fixture = () =>
       pages: {},
       global: { nodes: {} },
       catalog: context.window.SiteDefaults.products,
-      brand: { name: 'SORA', logo: '/assets/story-question.png' },
+      brand: {
+        name: 'SORA',
+        logo: '/assets/story-question.png',
+      },
+      contact: context.window.SiteDefaults.contact,
     }),
   );
+
 test('catalog, brand, stickers and effects validate without accepting unsafe or malformed content', () => {
   const good = fixture();
+
   good.catalog[0].modifiedFields = ['image'];
   good.global.nodes.header = {
     sticker: 'star',
-    effect: { type: 'custom', image: '/media/test.png', density: 8, opacity: 0.5, size: 20 },
+    effect: {
+      type: 'custom',
+      image: '/media/test.png',
+      density: 8,
+      opacity: 0.5,
+      size: 20,
+    },
   };
+
   assert.equal(validateDocument(good), good);
+
   const invalid = [
     (d) => d.catalog.push(d.catalog[0]),
     (d) => d.catalog.pop(),
@@ -36,30 +54,281 @@ test('catalog, brand, stickers and effects validate without accepting unsafe or 
     (d) => (d.catalog[0].modifiedFields = ['invalid']),
     (d) => (d.brand.logo = 'javascript:alert(1)'),
     (d) => (d.global.nodes.header = { sticker: 'unknown' }),
-    (d) => (d.global.nodes.header = { effect: { type: 'custom', image: 'javascript:alert(1)' } }),
-    (d) => (d.global.nodes.header = { effect: { type: 'snow', density: 1000 } }),
+    (d) =>
+      (d.global.nodes.header = {
+        effect: {
+          type: 'custom',
+          image: 'javascript:alert(1)',
+        },
+      }),
+    (d) =>
+      (d.global.nodes.header = {
+        effect: {
+          type: 'snow',
+          density: 1000,
+        },
+      }),
   ];
+
   for (const change of invalid) {
     const data = fixture();
     change(data);
     assert.throws(() => validateDocument(data));
   }
 });
+
 test('all 100 additional stickers can be saved through the document API', () => {
   assert.equal(Object.keys(extraStickers).length, 100);
+
   for (const sticker of Object.keys(extraStickers)) {
     const data = fixture();
     data.global.nodes.header = { sticker };
     assert.equal(validateDocument(data), data);
   }
 });
+
+/* Contact */
+
+test('structured contact validates successfully', () => {
+  const data = fixture();
+
+  data.contact.line.url = 'https://lin.ee/SVyOMJG';
+  data.contact.line.qrImage = 'assets/line-oa-qr.png';
+
+  assert.equal(validateDocument(data), data);
+});
+
+test('contact accepts Thai and English localized content', () => {
+  const data = fixture();
+
+  data.contact.hero.title = {
+    th: 'ติดต่อเรา',
+    en: 'Contact us',
+  };
+
+  data.contact.form.title = {
+    th: 'ส่งข้อความถึงเรา',
+    en: 'Send us a message',
+  };
+
+  data.contact.location.title = {
+    th: 'สถานที่ตั้งสำนักงาน',
+    en: 'Our office location',
+  };
+
+  assert.equal(validateDocument(data), data);
+});
+
+test('contact rejects unsupported language keys', () => {
+  const data = fixture();
+  data.contact.hero.title.ja = 'お問い合わせ';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid localized text/,
+  );
+});
+
+test('contact rejects unsafe LINE URL', () => {
+  const data = fixture();
+  data.contact.line.url = 'javascript:alert(1)';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid LINE URL/,
+  );
+});
+
+test('contact accepts the current LINE OA URL and QR asset', () => {
+  const data = fixture();
+
+  data.contact.line.url = 'https://lin.ee/SVyOMJG';
+  data.contact.line.qrImage = 'assets/line-oa-qr.png';
+
+  assert.equal(validateDocument(data), data);
+  assert.equal(data.contact.line.url, 'https://lin.ee/SVyOMJG');
+  assert.equal(data.contact.line.qrImage, 'assets/line-oa-qr.png');
+});
+
+test('contact rejects unsafe hero image', () => {
+  const data = fixture();
+  data.contact.hero.image = 'javascript:alert(1)';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact hero image/,
+  );
+});
+
+test('contact accepts local hero and QR image assets', () => {
+  const data = fixture();
+
+  data.contact.hero.image = 'assets/contact-hero-bg.jpg';
+  data.contact.line.qrImage = 'assets/line-oa-qr.png';
+
+  assert.equal(validateDocument(data), data);
+});
+
+test('contact rejects unsafe QR image', () => {
+  const data = fixture();
+  data.contact.line.qrImage = 'javascript:alert(1)';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid LINE QR image/,
+  );
+});
+
+test('contact rejects unsafe Google Maps URL', () => {
+  const data = fixture();
+  data.contact.location.mapUrl = 'javascript:alert(1)';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact map URL/,
+  );
+});
+
+test('contact rejects unsafe Google Maps embed URL', () => {
+  const data = fixture();
+  data.contact.location.mapEmbedUrl = 'javascript:alert(1)';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact map embed URL/,
+  );
+});
+
+test('contact rejects more than three hero features', () => {
+  const data = fixture();
+
+  data.contact.hero.features.push({
+    th: 'จุดเด่นที่ 4',
+    en: 'Fourth feature',
+  });
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact features/,
+  );
+});
+
+test('contact rejects invalid hero feature content', () => {
+  const data = fixture();
+
+  data.contact.hero.features[0] = {
+    th: 'สอบถามสินค้า',
+    en: 'Product enquiry',
+    ja: '商品について',
+  };
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid localized text/,
+  );
+});
+
+test('contact rejects unknown top-level fields', () => {
+  const data = fixture();
+  data.contact.unknown = { test: true };
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact field/,
+  );
+});
+
+test('contact rejects unknown hero fields', () => {
+  const data = fixture();
+  data.contact.hero.unknown = 'invalid';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact hero field/,
+  );
+});
+
+test('contact rejects unknown LINE fields', () => {
+  const data = fixture();
+  data.contact.line.unknown = 'invalid';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact LINE field/,
+  );
+});
+
+test('contact rejects unknown form fields', () => {
+  const data = fixture();
+  data.contact.form.unknown = 'invalid';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact form field/,
+  );
+});
+
+test('contact rejects invalid form label fields', () => {
+  const data = fixture();
+
+  data.contact.form.labels.subject = {
+    th: 'หัวข้อ',
+    en: 'Subject',
+  };
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact form field/,
+  );
+});
+
+test('contact rejects unknown location fields', () => {
+  const data = fixture();
+  data.contact.location.unknown = 'invalid';
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact location field/,
+  );
+});
+
+test('legacy contact details remain valid', () => {
+  const data = fixture();
+  data.contact = { details: 'Legacy contact information' };
+
+  assert.equal(validateDocument(data), data);
+});
+
+test('legacy contact details still reject oversized content', () => {
+  const data = fixture();
+  data.contact = { details: 'x'.repeat(20001) };
+
+  assert.throws(
+    () => validateDocument(data),
+    /Invalid contact details/,
+  );
+});
+
+/* Product details */
+
 test('product details accept optional legacy records and reject unsafe assets or invalid rows', () => {
   const details = {
-    gallery: [{ url: '/assets/product.png', alt: 'Product' }],
+    gallery: [
+      {
+        url: '/assets/product.png',
+        alt: 'Product',
+      },
+    ],
     stockStatus: 'in_stock',
     rating: '4.8',
     reviewCount: '128',
-    nutrition: [{ name: 'Vitamin C', amount: '100 mg', dailyValue: '111%' }],
+    nutrition: [
+      {
+        name: 'Vitamin C',
+        amount: '100 mg',
+        dailyValue: '111%',
+      },
+    ],
     certificates: [
       {
         id: 'document-1',
@@ -69,13 +338,21 @@ test('product details accept optional legacy records and reject unsafe assets or
         filename: 'spec.pdf',
       },
     ],
-    faq: [{ question: 'Question?', answer: 'Answer.' }],
+    faq: [
+      {
+        question: 'Question?',
+        answer: 'Answer.',
+      },
+    ],
     relatedIds: ['glow'],
   };
+
   const data = fixture();
   data.catalog[0].details = details;
   data.catalog[0].modifiedFields = ['details'];
+
   assert.equal(validateDocument(data), data);
+
   for (const change of [
     (d) => (d.gallery[0].url = 'javascript:alert(1)'),
     (d) => (d.certificates[0].url = 'data:text/html,evil'),
@@ -90,59 +367,91 @@ test('product details accept optional legacy records and reject unsafe assets or
     (d) => (d.overviewBullets = [{}]),
   ]) {
     const bad = fixture();
+
     bad.catalog[0].details = structuredClone(details);
     change(bad.catalog[0].details);
+
     assert.throws(() => validateDocument(bad));
   }
 });
+
 test('deleted default products stay recoverable and cannot remain active', () => {
   const data = fixture();
+
   data.catalog[0].deleted = true;
   data.catalog[0].active = false;
   data.catalog[0].modifiedFields = ['deleted', 'active'];
+
   assert.equal(validateDocument(data), data);
+
   data.catalog[0].active = true;
   assert.throws(() => validateDocument(data));
+
   data.catalog[0].active = false;
   data.catalog[0].deleted = 'true';
   assert.throws(() => validateDocument(data));
 });
+
 test('sample product data fills legacy blanks but respects later edits and removal', () => {
   const scope = { window: {} };
+
   vm.runInNewContext(
     readFileSync(new URL('../src/shared/site-config.js', import.meta.url), 'utf8'),
     scope,
   );
+
   vm.runInNewContext(
     readFileSync(new URL('../src/shared/product-details.js', import.meta.url), 'utf8'),
     scope,
   );
-  const product = scope.window.SiteDefaults.products[0],
-    get = scope.window.ProductDetails.get;
+
+  const product = scope.window.SiteDefaults.products[0];
+  const get = scope.window.ProductDetails.get;
   const sample = get(product);
+
   assert.equal(sample.sampleInfo, true);
   assert.equal(sample.samplePrice, '฿1,267.82');
   assert.equal(sample.nutrition.length, 8);
   assert.equal(sample.certificates.length, 1);
+
   const legacy = get({
     ...product,
     details: {
       nutrition: [],
-      summary: sample.summary.map((row) => ({ ...row, value: '' })),
+      summary: sample.summary.map((row) => ({
+        ...row,
+        value: '',
+      })),
       certificates: [],
     },
   });
+
   assert.equal(legacy.nutrition.length, 8);
   assert.equal(legacy.summary[0].value, '1 capsule');
   assert.equal(legacy.certificates.length, 1);
+
   const edited = get({
     ...product,
-    details: { sampleInfo: true, nutrition: [], certificates: [], summary: [] },
+    details: {
+      sampleInfo: true,
+      nutrition: [],
+      certificates: [],
+      summary: [],
+    },
   });
+
   assert.equal(edited.nutrition.length, 0);
   assert.equal(edited.certificates.length, 0);
   assert.equal(edited.summary.length, 0);
-  const confirmed = get({ ...product, details: { sampleInfo: false, servingSize: '2 gummies' } });
+
+  const confirmed = get({
+    ...product,
+    details: {
+      sampleInfo: false,
+      servingSize: '2 gummies',
+    },
+  });
+
   assert.equal(confirmed.sampleInfo, false);
   assert.equal(confirmed.servingSize, '2 gummies');
   assert.equal(confirmed.nutrition.length, 0);

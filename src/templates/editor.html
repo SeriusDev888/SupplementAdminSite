@@ -51,7 +51,7 @@
         <div class="management-launch">
           <button data-manager="products">จัดการสินค้า ↗</button
           ><button data-manager="brand">จัดการแบรนด์ ↗</button
-          ><button data-manager="contact">จัดการ Contact</button>
+          ><button data-manager="contact">จัดการ Contact ↗</button>
         </div>
         <div class="top-spacer"></div>
         <span id="save-state" role="status">กำลังโหลดฉบับร่าง</span
@@ -184,7 +184,13 @@
                     >สีพื้นหลัง<input
                       type="color"
                       id="backgroundColor"
-                      data-style="backgroundColor" /></label
+                      data-style="backgroundColor"
+                    /><button
+                      type="button"
+                      id="clear-bg-color"
+                      class="transparent-btn"
+                      title="ลบสีพื้นหลังให้โปร่งใส (Transparent)"
+                    ><span class="transparent-icon" aria-hidden="true"></span>ไม่มีสี (Transparent)</button></label
                   ><label class="field"
                     >ขนาดตัวอักษร<input
                       type="number"
@@ -440,6 +446,11 @@
             </p>
             <div id="sticker-fields" hidden>
               <div id="sticker-grid"></div>
+              <div id="sticker-pagination" class="sticker-pagination">
+                <button type="button" id="sticker-prev" class="quiet">← ย้อนกลับ</button>
+                <span id="sticker-page-info">หน้า 1 / 6</span>
+                <button type="button" id="sticker-next" class="quiet">ถัดไป →</button>
+              </div>
               <div class="field-grid">
                 <label class="field">สีไอคอน<input type="color" id="sticker-color" /></label
                 ><label class="field"
@@ -484,15 +495,7 @@
               </select></label
             >
           </section>
-          <section id="tab-contact" class="tab-panel" hidden>
-            <div
-              id="contact-details"
-              contenteditable="plaintext-only"
-              role="textbox"
-              aria-multiline="true"
-              aria-label="รายละเอียด Contact"
-            ></div>
-          </section>
+          <section id="tab-contact" class="tab-panel" hidden></section>
           <section id="tab-media" class="tab-panel" hidden>
             <div class="panel-intro">
               <span class="tiny">MEDIA LIBRARY</span>
@@ -541,10 +544,6 @@
           <h1 id="manager-title">จัดการสินค้า</h1>
           <p>แก้ข้อมูลที่ใช้ร่วมกันทั้งเว็บไซต์ บันทึกและเผยแพร่ด้วยปุ่มด้านบน</p>
         </div>
-        <nav aria-label="หน้าจัดการ">
-          <button data-manager="products">สินค้า</button><button data-manager="brand">แบรนด์</button
-          ><button data-manager="contact">Contact</button>
-        </nav>
       </div>
       <div id="management-panels"></div>
     </section>

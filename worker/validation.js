@@ -268,6 +268,242 @@ function validateProductDetails(d) {
   )
     fail('Invalid related products');
 }
+function validateLocalizedText(value, max = 1500) {
+  if (value === undefined) return;
+
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    fail('Invalid localized text');
+
+  const allowed = new Set(['th', 'en']);
+
+  for (const [key, text] of Object.entries(value)) {
+    if (!allowed.has(key) || !safeString(text, max))
+      fail('Invalid localized text');
+  }
+}
+
+function validateContact(contact) {
+  if (!contact || typeof contact !== 'object' || Array.isArray(contact))
+    fail('Invalid contact');
+
+  const allowedSections = new Set([
+    'details',
+    'hero',
+    'line',
+    'form',
+    'location',
+  ]);
+
+  for (const key of Object.keys(contact))
+    if (!allowedSections.has(key))
+      fail('Invalid contact field');
+
+  // รองรับ draft เก่าที่ยังมี contact.details
+  if (
+    contact.details !== undefined &&
+    !safeString(contact.details, 20000)
+  )
+    fail('Invalid contact details');
+
+  if (contact.hero !== undefined) {
+    const hero = contact.hero;
+
+    if (!hero || typeof hero !== 'object' || Array.isArray(hero))
+      fail('Invalid contact hero');
+
+    const allowed = new Set([
+      'image',
+      'tag',
+      'title',
+      'subtitle',
+      'features',
+    ]);
+
+    for (const key of Object.keys(hero))
+      if (!allowed.has(key))
+        fail('Invalid contact hero field');
+
+    if (hero.image !== undefined && !safeURL(hero.image, true))
+      fail('Invalid contact hero image');
+
+    validateLocalizedText(hero.tag, 300);
+    validateLocalizedText(hero.title, 1500);
+    validateLocalizedText(hero.subtitle, 5000);
+
+    if (hero.features !== undefined) {
+      if (
+        !Array.isArray(hero.features) ||
+        hero.features.length > 3
+      )
+        fail('Invalid contact features');
+
+      for (const feature of hero.features)
+        validateLocalizedText(feature, 1000);
+    }
+  }
+
+  if (contact.line !== undefined) {
+    const line = contact.line;
+
+    if (!line || typeof line !== 'object' || Array.isArray(line))
+      fail('Invalid contact LINE');
+
+    const allowed = new Set([
+      'url',
+      'lineId',
+      'qrImage',
+      'badge',
+      'title',
+      'description',
+      'buttonText',
+      'scanText',
+    ]);
+
+    for (const key of Object.keys(line))
+      if (!allowed.has(key))
+        fail('Invalid contact LINE field');
+
+    if (line.url !== undefined && !safeURL(line.url))
+      fail('Invalid LINE URL');
+
+    if (line.qrImage !== undefined && !safeURL(line.qrImage, true))
+      fail('Invalid LINE QR image');
+
+    if (
+      line.lineId !== undefined &&
+      !safeString(line.lineId, 200)
+    )
+      fail('Invalid LINE ID');
+
+    validateLocalizedText(line.badge, 300);
+    validateLocalizedText(line.title, 1500);
+    validateLocalizedText(line.description, 5000);
+    validateLocalizedText(line.buttonText, 500);
+    validateLocalizedText(line.scanText, 1000);
+  }
+
+  if (contact.form !== undefined) {
+    const form = contact.form;
+
+    if (!form || typeof form !== 'object' || Array.isArray(form))
+      fail('Invalid contact form');
+
+    const allowed = new Set([
+      'tag',
+      'title',
+      'description',
+      'labels',
+      'placeholders',
+      'buttonText',
+      'sendingText',
+      'successTitle',
+      'successDescription',
+    ]);
+
+    for (const key of Object.keys(form))
+      if (!allowed.has(key))
+        fail('Invalid contact form field');
+
+    validateLocalizedText(form.tag, 300);
+    validateLocalizedText(form.title, 1500);
+    validateLocalizedText(form.description, 5000);
+    validateLocalizedText(form.buttonText, 500);
+    validateLocalizedText(form.sendingText, 500);
+    validateLocalizedText(form.successTitle, 1000);
+    validateLocalizedText(form.successDescription, 3000);
+
+    for (const groupName of ['labels', 'placeholders']) {
+      const group = form[groupName];
+
+      if (group === undefined) continue;
+
+      if (!group || typeof group !== 'object' || Array.isArray(group))
+        fail('Invalid contact form fields');
+
+      const allowedFields = new Set([
+        'name',
+        'email',
+        'phone',
+        'message',
+      ]);
+
+      for (const [key, value] of Object.entries(group)) {
+        if (!allowedFields.has(key))
+          fail('Invalid contact form field');
+
+        validateLocalizedText(
+          value,
+          groupName === 'placeholders' ? 1500 : 500,
+        );
+      }
+    }
+  }
+
+  if (contact.location !== undefined) {
+    const location = contact.location;
+
+    if (
+      !location ||
+      typeof location !== 'object' ||
+      Array.isArray(location)
+    )
+      fail('Invalid contact location');
+
+    const allowed = new Set([
+      'tag',
+      'title',
+      'company',
+      'address',
+      'phone',
+      'email',
+      'officeHours',
+      'emailNote',
+      'standard',
+      'standardNote',
+      'mapButtonText',
+      'mapUrl',
+      'mapEmbedUrl',
+    ]);
+
+    for (const key of Object.keys(location))
+      if (!allowed.has(key))
+        fail('Invalid contact location field');
+
+    validateLocalizedText(location.tag, 300);
+    validateLocalizedText(location.title, 1500);
+    validateLocalizedText(location.company, 1000);
+    validateLocalizedText(location.address, 5000);
+    validateLocalizedText(location.officeHours, 1000);
+    validateLocalizedText(location.emailNote, 1000);
+    validateLocalizedText(location.standard, 1000);
+    validateLocalizedText(location.standardNote, 1000);
+    validateLocalizedText(location.mapButtonText, 1000);
+
+    if (
+      location.phone !== undefined &&
+      !safeString(location.phone, 500)
+    )
+      fail('Invalid contact phone');
+
+    if (
+      location.email !== undefined &&
+      !safeString(location.email, 500)
+    )
+      fail('Invalid contact email');
+
+    if (
+      location.mapUrl !== undefined &&
+      !safeURL(location.mapUrl)
+    )
+      fail('Invalid contact map URL');
+
+    if (
+      location.mapEmbedUrl !== undefined &&
+      !safeURL(location.mapEmbedUrl)
+    )
+      fail('Invalid contact map embed URL');
+  }
+}
 export function validateDocument(document) {
   if (
     !document ||
@@ -383,16 +619,9 @@ export function validateDocument(document) {
     if (!['daily', 'glow', 'calm'].every((id) => ids.has(id)))
       fail('Keep the existing product records');
   }
-  if (document.contact !== undefined) {
-    const contact = document.contact;
-    if (
-      !contact ||
-      typeof contact !== 'object' ||
-      Array.isArray(contact) ||
-      (contact.details !== undefined && !safeString(contact.details, 20000))
-    )
-      fail('Invalid contact details');
-  }
+  if (document.contact !== undefined)
+  validateContact(document.contact);
+
   const theme = document.theme || {};
   for (const key of ['background', 'text', 'accent', 'surface'])
     if (theme[key] !== undefined && !/^#[a-fA-F0-9]{6}$/.test(theme[key]))

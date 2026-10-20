@@ -80,6 +80,202 @@ window.SiteDefaults = {
       ],
     },
   ],
+  contact: {
+    hero: {
+      image: 'assets/contact-hero-bg.jpg',
+
+      tag: {
+        th: 'CONTACT US',
+        en: 'CONTACT US',
+      },
+
+      title: {
+        th: 'สอบถาม / สั่งซื้อสินค้า\nผ่าน LINE OA',
+        en: 'Inquire & Order\nvia LINE OA',
+      },
+
+      subtitle: {
+        th: 'พูดคุยกับทีมงานของเรา เพื่อสอบถามข้อมูลสินค้า รับคำแนะนำ\nหรือสั่งซื้อผ่าน LINE OA ได้ง่าย และรวดเร็ว',
+        en: 'Talk with our team for product information, recommendations,\nor quick and easy ordering through LINE OA.',
+      },
+
+      features: [
+        {
+          th: 'สอบถามสินค้า\nได้ทันที',
+          en: 'Ask about products\ninstantly',
+        },
+        {
+          th: 'สั่งซื้อสะดวก\nผ่าน LINE OA',
+          en: 'Order easily\nvia LINE OA',
+        },
+        {
+          th: 'ทีมงานดูแล\nคุณอย่างใกล้ชิด',
+          en: 'Friendly support\nfrom our team',
+        },
+      ],
+    },
+
+    line: {
+      url: 'https://lin.ee/SVyOMJG',
+      lineId: '',
+      qrImage: 'assets/line-oa-qr.png',
+
+      badge: {
+        th: 'แนะนำ',
+        en: 'RECOMMENDED',
+      },
+
+      title: {
+        th: 'เพิ่มเพื่อน LINE OA\nเพื่อสั่งซื้อสินค้า',
+        en: 'Add LINE OA\nfor Quick Ordering',
+      },
+
+      description: {
+        th: 'รับข้อมูลสินค้า โปรโมชั่น และสั่งซื้อสินค้าผ่าน LINE OA\nได้ง่ายที่สุด ทีมงานตอบกลับอย่างรวดเร็ว',
+        en: 'Get product information, promotions, and place orders easily through LINE OA.\nOur team will get back to you as soon as possible.',
+      },
+
+      buttonText: {
+        th: 'เพิ่มเพื่อน LINE OA',
+        en: 'Add LINE OA',
+      },
+
+      scanText: {
+        th: 'สแกน QR Code\nเพื่อเพิ่มเพื่อน',
+        en: 'Scan the QR Code\nto add us on LINE',
+      },
+    },
+
+    form: {
+      tag: {
+        th: 'SEND US A MESSAGE',
+        en: 'SEND US A MESSAGE',
+      },
+
+      title: {
+        th: 'ส่งข้อความถึงเรา',
+        en: 'Send us a message',
+      },
+
+      description: {
+        th: 'หากมีคำถามเพิ่มเติม สามารถกรอกข้อมูลด้านล่างได้เลย ทีมงานของเราจะติดต่อกลับโดยเร็วที่สุด',
+        en: 'Have a question? Fill in the form below and our team will get back to you as soon as possible.',
+      },
+
+      labels: {
+        name: {
+          th: 'ชื่อ-นามสกุล *',
+          en: 'Name *',
+        },
+        email: {
+          th: 'อีเมล *',
+          en: 'Email *',
+        },
+        phone: {
+          th: 'เบอร์โทรศัพท์',
+          en: 'Phone number',
+        },
+        message: {
+          th: 'รายละเอียดเพิ่มเติม',
+          en: 'Message',
+        },
+      },
+
+      placeholders: {
+        name: {
+          th: 'เช่น คุณสมชาย ใจดี',
+          en: 'e.g. John Smith',
+        },
+        email: {
+          th: 'เช่น name@example.com',
+          en: 'e.g. name@example.com',
+        },
+        phone: {
+          th: 'เช่น 081 234 5678',
+          en: 'e.g. +66 81 234 5678',
+        },
+        message: {
+          th: 'เช่น สอบถามสินค้า / สั่งซื้อจำนวนมาก / สนใจเป็นตัวแทนจำหน่าย ฯลฯ',
+          en: 'e.g. Product enquiry / bulk order / distribution partnership',
+        },
+      },
+
+      buttonText: {
+        th: 'ส่งข้อความ',
+        en: 'Send message',
+      },
+
+      sendingText: {
+        th: 'กำลังส่งข้อความ...',
+        en: 'Sending...',
+      },
+
+      successTitle: {
+        th: 'ส่งข้อความเรียบร้อยแล้ว!',
+        en: 'Message sent!',
+      },
+
+      successDescription: {
+        th: 'ทีมงานได้รับข้อความของคุณแล้ว และจะติดต่อกลับโดยเร็วที่สุด',
+        en: 'Our team has received your message and will get back to you as soon as possible.',
+      },
+    },
+
+    location: {
+      tag: {
+        th: 'OUR LOCATION',
+        en: 'OUR LOCATION',
+      },
+
+      title: {
+        th: 'สถานที่ตั้งสำนักงาน',
+        en: 'Our office location',
+      },
+
+      company: {
+        th: 'Golden Ray Cellular Nutrition Co., Ltd.',
+        en: 'Golden Ray Cellular Nutrition Co., Ltd.',
+      },
+
+      address: {
+        th: '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพมหานคร 10110',
+        en: '123 Sukhumvit Road, Khlong Toei, Bangkok 10110, Thailand',
+      },
+
+      phone: '+66 (0) 2-123-4567',
+      email: 'clinical@goldenray.com',
+
+      officeHours: {
+        th: 'จันทร์ - ศุกร์, 9:00 - 18:00 น.',
+        en: 'Mon-Fri, 9:00 - 18:00',
+      },
+
+      emailNote: {
+        th: 'ตอบกลับภายใน 24 ชั่วโมง',
+        en: 'Replies within 24 hours',
+      },
+
+      standard: {
+        th: 'GMP & ISO 22000',
+        en: 'GMP & ISO 22000',
+      },
+
+      standardNote: {
+        th: 'มาตรฐานการผลิต',
+        en: 'Manufacturing standards',
+      },
+
+      mapButtonText: {
+        th: 'ดูเส้นทางบน Google Maps',
+        en: 'View on Google Maps',
+      },
+
+      mapUrl: 'https://maps.google.com/?q=13.736717,100.560449',
+
+      mapEmbedUrl:
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.8821956100236!2d100.56044937589998!3d13.736717397268804!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30e29ed8e5b8719f%3A0x6b8b0e8b1b2c3d4e!2sSukhumvit%20Rd%2C%20Khlong%20Toei%2C%20Bangkok!5e0!3m2!1sen!2sth!4v1700000000000!5m2!1sen!2sth',
+    },
+  },
   icons: {
     arrow: 'M5 12h14m-5-5 5 5-5 5',
     leaf: 'M20 4C9 2 2 9 6 16c7 5 15-1 14-12ZM6 18 17 7M4 21l4-7',

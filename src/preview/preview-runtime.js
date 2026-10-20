@@ -34,7 +34,7 @@
   ];
   function indexTree(root, prefix, keep = false) {
     if (!root) return;
-    if (prefix === 'main' && SiteDefaults.isProductRoute(route())) return;
+    if (prefix === 'main' && (route() === 'contact' || SiteDefaults.isProductRoute(route()))) return;
     let index = 0;
     function walk(el, id) {
       if (ignored(el)) return;
@@ -279,7 +279,7 @@
     applyTheme();
     SiteCMS.productImages();
     applyGroup(documentState.global);
-    if (!SiteDefaults.isProductRoute(route())) applyGroup(documentState.pages?.[route()]);
+    if (route() !== 'contact' && !SiteDefaults.isProductRoute(route())) applyGroup(documentState.pages?.[route()]);
     SiteCMS.applyBrand();
     const header = document.querySelector('.header'),
       needsHeaderSpace =
@@ -454,7 +454,7 @@
   }
   function select(el) {
     if (!el?.dataset.veId || el.closest('[data-ve-deleted="true"]')) return;
-    if (SiteDefaults.isProductRoute(route()) && main.contains(el)) return;
+    if ((route() === 'contact' || SiteDefaults.isProductRoute(route())) && main.contains(el)) return;
     document.querySelectorAll('.ve-selected').forEach((e) => e.classList.remove('ve-selected'));
     selection = el.dataset.veId;
     el.classList.add('ve-selected');
@@ -487,7 +487,7 @@
   }
   function beginTextEdit(el) {
     if (!el || describe(el).text === null || el.isContentEditable) return;
-    if (SiteDefaults.isProductRoute(route()) && main.contains(el)) return;
+    if ((route() === 'contact' || SiteDefaults.isProductRoute(route())) && main.contains(el)) return;
     el.contentEditable = 'plaintext-only';
     el.focus();
     placeToolbar();

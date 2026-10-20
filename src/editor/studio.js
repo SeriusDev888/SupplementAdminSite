@@ -1,3 +1,4 @@
+
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id),
@@ -211,6 +212,7 @@
   }
   function patch(values, scope = selected?.scope, id = selected?.id, page = route) {
     if (!id) return;
+    if (page === 'contact' && scope !== 'global') return;
     if (scope !== 'global' && SiteDefaults.isProductRoute(page)) return;
     if (
       values.image !== undefined &&
@@ -318,7 +320,7 @@
   }
   $('manager-back').onclick = () => {
     closeManager();
-    document.querySelector('[data-manager="products"]').focus();
+    document.querySelector('[data-manager="products"]')?.focus();
   };
   all('[data-manager]').forEach((b) => (b.onclick = () => tab(b.dataset.manager)));
   all('[data-tab]').forEach((b) => (b.onclick = () => tab(b.dataset.tab)));
@@ -537,6 +539,7 @@
     if (m.type === 'ready') {
       route = m.route;
       syncProductLock();
+      syncContactLock();
       location.hash = route;
       $('page-select').value = route;
       $('open-live').href = '/#' + route;
@@ -564,6 +567,7 @@
     }
     if (
       m.type === 'selected' &&
+      !(m.route === 'contact' && m.element.scope === 'page') &&
       !(m.element.scope === 'page' && SiteDefaults.isProductRoute(m.route))
     )
       populate(m.element);
@@ -576,6 +580,7 @@
   function navigate(page) {
     route = page;
     syncProductLock();
+    syncContactLock();
     location.hash = route;
     $('page-select').value = route;
     selected = null;
@@ -593,6 +598,13 @@
       $('element-fields').hidden = true;
     }
   }
+  function syncContactLock() {
+    // Contact is view-only in the visual editor. No warning or banner.
+    if (route !== 'contact') return;
+    selected = null;
+    $('no-selection').hidden = true;
+    $('element-fields').hidden = true;
+  }
   $('page-select').onchange = () => navigate($('page-select').value);
   $('text-value').oninput = () => patch({ text: $('text-value').value });
   $('link-value').onchange = () => patch({ href: $('link-value').value.trim() });
@@ -601,6 +613,10 @@
   $('remove-image').onclick = () => {
     patch({ image: '' });
     $('image-value').value = '';
+  };
+  $('clear-bg-color').onclick = () => {
+    patchStyle('backgroundColor', 'transparent');
+    $('backgroundColor').value = '#ffffff';
   };
   all('[data-style]').forEach(
     (input) =>
